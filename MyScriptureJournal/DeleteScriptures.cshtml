@@ -1,0 +1,92 @@
+﻿@{
+    var book = "";
+    var chapter = "";
+    var verse = "";
+    var notes = "";
+    var Id = "";
+
+    if (!Request.QueryString["ID"].IsEmpty())
+    {
+        Id = Request.QueryString["ID"];
+        var db = WebMatrix.Data.Database.Open("MyScriptures");
+        var dbCommand = "SELECT * FROM MyScriptures WHERE ID = @0";
+        var row = db.QuerySingle(dbCommand, Id);
+        book = row.book;
+        chapter = row.chapter.ToString();
+        verse = row.verse.ToString();
+        notes = row.notes.ToString();
+
+    }
+    else
+    {
+        Validation.AddFormError("No journal entry was selected.");
+    }
+
+    if(IsPost && !Request["buttonDelete"].IsEmpty()){
+        Id = Request.Form["Id"];
+        var db = WebMatrix.Data.Database.Open("MyScriptures");
+        var deleteCommand = "DELETE FROM MyScriptures WHERE ID = @0";
+        db.Execute(deleteCommand, Id);
+        Response.Redirect("~/Scriptures");
+    }
+}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>My Journal</title>
+        <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/styles/HomPage.css" />
+        <link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet">
+    </head>
+    <body>
+        <header id="TopMenu" class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="~/Scriptures.cshtml" id="headLogo">My Journal</a>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="~/Scriptures.cshtml">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="~/AddScripture.cshtml">New Entry</a>
+                </li>
+            </ul>
+        </header>
+        <div class="container rounded-bottom border" id="formInput">
+            <h1>
+                My Scripture Journal
+            </h1>
+            <h3>Delete Journal Entry</h3>
+                    @Html.ValidationSummary()
+                
+
+                <form method="post">
+                    <fieldset>
+                        <legend>Movie Information</legend>
+
+                        <p>
+                            <span>Book:</span>
+                            <span>@book</span>
+                        </p>
+
+                        <p>
+                            <span>Chapter:</span>
+                            <span>@chapter</span>
+                        </p>
+
+                        <p>
+                            <span>Verse:</span>
+                            <span>@verse</span>
+                        </p>
+
+                        <p>
+                            <span>Notes:</span>
+                            <span>@notes</span>
+                        </p>
+
+                        <input type="hidden" name="Id" value="@Id" />
+                        <input type="submit" class="btn btn-danger" value="Delete" name="buttonDelete" />
+                        <a href="~/Scriptures.cshtml" class="btn btn-primary">Cancel</a>
+                    </fieldset>
+                </form>
+        </div>
+    </body>
+</html>

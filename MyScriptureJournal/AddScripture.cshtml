@@ -1,0 +1,94 @@
+﻿@{
+    var book = "";
+    var chapter = "";
+    var verse = "";
+    var notes = "";
+    string date;
+
+    Validation.RequireField("book", "Book is required.");
+    Validation.RequireField("chapter", "Chapter is required.");
+    Validation.RequireField("verse", "Verse is required.");
+    Validation.RequireField("notes", "Notes are required.");
+
+
+    if (IsPost)
+    {
+        book = Request.Form["book"];
+        chapter = Request.Form["chapter"];
+        verse = Request.Form["verse"];
+        notes = Request.Form["notes"];
+        date = DateTime.Now.ToString("MM/dd/yyyy");
+
+        if (Validation.IsValid())
+        {
+            var db = WebMatrix.Data.Database.Open("MyScriptures");
+            var insertCommand = "INSERT INTO MyScriptures (book, chapter, verse, notes, date) VALUES(@0, @1, @2, @3, @4)";
+            db.Execute(insertCommand, book, chapter, verse, notes, date);
+            Response.Redirect("~/Scriptures");
+
+        }
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Journal</title>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/styles/HomPage.css" />
+    <link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet">
+</head>
+
+<body>
+    <header id="TopMenu" class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="~/Scriptures.cshtml" id="headLogo">My Journal</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="~/Scriptures.cshtml">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="~/AddScripture.cshtml">New Entry</a>
+            </li>
+        </ul>
+    </header>
+
+
+    <div class="container rounded-bottom border" id="formInput">
+        <h1>
+            My Scripture Journal
+        </h1>
+        @Html.ValidationSummary()
+        <form method="post">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Book</span>
+                </div>
+                <input type="text" class="form-control" name="book" value="@Request.Form["book"]" />
+            </div>
+
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon2">Chapter</span>
+                </div>
+                <input name="chapter" class="form-control" type="text" value="@Request.Form["chapter"]" />
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">Verse</span>
+                </div>
+                <input name="verse" class="form-control" type="text" value="@Request.Form["verse"]" />
+            </div>
+
+            <div class="textGroup">
+                <div class="form-group">
+                    <label for="comment">Notes:</label>
+                    <textarea class="form-control" rows="5" value="@Request.Form["notes"]" name="notes"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success" id="enterBtn">Enter</button>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,102 @@
+﻿@{
+    var db = WebMatrix.Data.Database.Open("MyScriptures");
+    var selectCommand = "SELECT * FROM MyScriptures";
+    var searchTerm = " ";
+    string sortTerm = "book";
+
+    if (!Request.QueryString["searchBook"].IsEmpty())
+    {
+        selectCommand = "SELECT * FROM MyScriptures WHERE book LIKE @0";
+        searchTerm = "%" + Request["searchBook"] + "%";
+    }
+
+    if (!Request.QueryString["keyword"].IsEmpty())
+    {
+        selectCommand = "SELECT * FROM MyScriptures WHERE notes LIKE @0";
+        searchTerm = "%" + Request["keyword"] + "%";
+    }
+
+    if (!Request.QueryString["sortBook"].IsEmpty())
+    {
+        sortTerm = "book";
+    }
+    if (!Request.QueryString["sortDate"].IsEmpty())
+    {
+        sortTerm = "date";
+        
+    }
+    var selectedData = db.Query(selectCommand, searchTerm);
+    var grid = new WebGrid(source: selectedData, defaultSort: sortTerm, rowsPerPage: 5);
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Journal</title>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/styles/HomPage.css" />
+    <link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet">
+</head>
+
+<body>
+    <header id="TopMenu" class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="~/Scriptures.cshtml" id="headLogo">My Journal</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="~/Scriptures.cshtml">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="~/AddScripture.cshtml">New Entry</a>
+            </li>
+        </ul>
+    </header>
+
+
+    <div class="container rounded-bottom border" id="formInput">
+        <h1>
+            My Scripture Journal
+        </h1>
+
+        <form method="get" class="table">
+            <h3>Filter by:</h3>
+            <label for="book">Book</label>
+            <input type="text" name="searchBook" value="@Request.QueryString["searchBook"]" class="rounded" />
+            <label for="keyword">Keyword</label>
+            <input type="text" name="keyword" value="@Request.QueryString["keyword"]" class="rounded" />
+            <br />
+                <label for="sort">Sort by: &nbsp;</label>
+
+                <label class="radio-inline">
+                <input type="radio" name="sortBook"
+                       value="@Request.QueryString["sortBook"]">Book &nbsp;</label>
+                <label class="radio-inline">
+                <input type="radio" name="sortDate" 
+                       value="@Request.QueryString["sortDate"]">Date</label>
+
+
+            <br />
+            <input type="submit" name="search" value="Search" class="btn btn-dark" />
+        </form>
+
+    <div class="table border rounded">
+        @grid.GetHtml(
+tableStyle: "grid",
+headerStyle: "head",
+alternatingRowStyle: "alt",
+columns: grid.Columns(
+    grid.Column(format: @<a href="~/EditScriptures?id=@item.ID">Edit</a>),
+                        grid.Column("Book"),
+                        grid.Column("Chapter"),
+                        grid.Column("Verse"),
+                        grid.Column("Notes"),
+                        grid.Column("Date"),
+                        grid.Column(format: @<a href="~/DeleteScriptures?id=@item.ID" style="color:red;">Delete</a>)
+                  )
+              )
+    </div>
+    <a class="btn btn-primary" id="addBtn" href="~/AddScripture.cshtml">Add Journal Entry</a>
+    </div>
+
+</body>
+
+</html>
